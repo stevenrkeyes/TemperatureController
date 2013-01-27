@@ -2,7 +2,7 @@
 # 27 Jan 2012
 # UI for the temperature monitor
 
-import Tkinter, tempMonitor, arduino
+import Tkinter, tempMonitor, arduino_win
 
 
 class monitorUI(Tkinter.Frame):
@@ -11,7 +11,7 @@ class monitorUI(Tkinter.Frame):
         self.pack() # pack frame into window
         self.createWidgets()
 
-        ard = arduino.Arduino()
+        ard = arduino_win.Arduino()
         self.tempMonitor = tempMonitor.tempMonitor(ard)
         ard.run()
 
@@ -28,7 +28,12 @@ class monitorUI(Tkinter.Frame):
 
     # starts the monitor (then calls itself recursively)
     def startMonitor(self):
-        self.tempLabel.config(text="77" + u'\N{DEGREE SIGN}' + "F")
+        
+        for sensor in self.tempMonitor.sensors:
+            print sensor.location, sensor.readTemp()
+        
+        t = str(int(round(self.tempMonitor.avgTemp())))
+        self.tempLabel.config(text=t + u'\N{DEGREE SIGN}' + "F")
         # use the labe's sleep thread function to call this again
         self.tempLabel.after(200, self.startMonitor)
         
@@ -45,4 +50,5 @@ UI = monitorUI(win)
 UI.startMonitor()
 
 UI.mainloop()
+UI.ard.stop()
 win.destroy()

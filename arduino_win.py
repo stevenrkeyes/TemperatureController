@@ -1,4 +1,6 @@
 # modified to scan windows ports
+# specifically, arduino.connect() was changes to search through (COM) ports 1-10
+# instead of ports ACM1-ACM4
 # --srkeyes, 15 jan 2012
 
 import sys
@@ -57,17 +59,17 @@ class Arduino(threading.Thread):
         print "Connecting"
         if self.portOpened: self.close()
         # Loop through possible values of ACMX, and try to connect on each one
-        for i in range(255):
+        for i in range(12):   # !!! changes for win
             try:
                 # Try to create the serial connection
-                self.port=serial.Serial(i, baudrate=9600, timeout=0.5)
+                self.port=serial.Serial(i, baudrate=9600, timeout=0.5)   # !!! changes for win
                 if self.port.isOpen():
                     time.sleep(2) # Wait for Arduino to initialize
                     print "Connected"
                     return True
             except:
                 # Some debugging prints
-                print "Arduino not connected on ACM{0}".format(i)
+                print "Arduino not connected on COM{0}".format(i)   # !!! changes for win
         print "Failed to connect"
         return False
 
