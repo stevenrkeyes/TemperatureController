@@ -13,19 +13,21 @@ import arduino, linReg, temperature
 class tempSensor(arduino.AnalogInput):
     def __init__(self, ard, port, location):
         self.ard = ard
-
-        # list of tuples [(readVoltage, actualTemperature), ...]
-        # like [(3.0, temp(k=290)), (4.2, temp(k=310))], etc
+        
+        # string for storing the physical location of the sensor
+        self.location = location
+        
+        # list of tuples [(readValue, actualTemperature), ...]
+        # like [(600, temp(k=290)), (800, temp(k=310))], etc
         self.calibrationValues = []
         
         arduino.AnalogInput.__init__(self, ard, port)
-        
 
     # read a temperature in K, correcting using the calibration values
     def readTemp(self):
         if len(self.calibrationValues)<2:
             # very rough approximation
-            return temperature.temp(k = self.getValue() * (5.0 / 1023.0) * 100 - 220)
+            return temperature.temp(f = self.getValue() * (5.0 / 1023.0) * 100 - 220)
         else:
             # just submit the k value, not the temp object
             formattedValues = [(point[0], point[1].k)
@@ -33,7 +35,8 @@ class tempSensor(arduino.AnalogInput):
             return temperature.temp(k=linReg.forecast(formattedValues,
                                                       self.getValue()))
 
-    def addCalibrationPoint(self, point):
+    def addCalibrationTemp(self, temp):
+        point = (self.getValue(), temp)
         self.calibrationValues.append(point)
 
     # getValue is inherited
@@ -41,7 +44,7 @@ class tempSensor(arduino.AnalogInput):
 if __name__ == "__main__":
     import time
     ard = arduino.Arduino()
-    t = tempSensor(ard, 0)
+    t = tempSensor(ard, 0, "desk")
     time.sleep(1)
 
     

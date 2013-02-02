@@ -49,3 +49,7 @@ class temp(object):
 
     def __int__(self):
         return int(self.k)
+
+    @classmethod
+    def avg(cls, temperatures):
+        return cls(k=1.0*(sum(t.k for t in temperatures)/len(temperatures)))

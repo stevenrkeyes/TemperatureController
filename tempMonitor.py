@@ -6,21 +6,21 @@
 # along with the radiator controller
 # radiator knob reader
 
-import tempSensor, threading
+import tempSensor, threading, temperature
 
 # class that represents a temperature monitor for steven's room
 class tempMonitor:
     def __init__(self, ard):
         self.ard = ard
 
-        sensors = [tempSensor.tempSensor(ard, 0, "desk"),
-                   tempSensor.tempSensor(ard, 1, "bed"),
-                   tempSensor.tempSensor(ard, 2, "door"),
-                   tempSensor.tempSensor(ard, 3, "hall"),
-                   tempSensor.tempSensor(ard, 4, "radiator")]
+        self.sensors = [tempSensor.tempSensor(ard, 0, "desk"),
+                        tempSensor.tempSensor(ard, 1, "bed"),
+                        tempSensor.tempSensor(ard, 2, "door"),
+                        tempSensor.tempSensor(ard, 3, "hall"),
+                        tempSensor.tempSensor(ard, 4, "radiator")]
 
     def avgTemp(self):
-        return sum([sensor.readTemp() for sensor in self.sensors])/len(self.sensors)
+        return temperature.temp.avg([sensor.readTemp() for sensor in self.sensors])
     # later, implement weighted average temperature
 
     def getSensor(self, location):
