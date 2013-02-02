@@ -4,8 +4,7 @@
 # connected in series with a resistor with an arduino reading the
 # voltage above the diode
 
-import arduino, linReg, temperature
-
+import arduino, linReg, temperature, pickle
 
 # class for a temperature sensor
 # also implements a table of read values and their calibrated counterparts
@@ -16,10 +15,19 @@ class tempSensor(arduino.AnalogInput):
         
         # string for storing the physical location of the sensor
         self.location = location
-        
+
+        # calibration values:
         # list of tuples [(readValue, actualTemperature), ...]
         # like [(600, temp(k=290)), (800, temp(k=310))], etc
-        self.calibrationValues = []
+
+        # try loading previous calibration values if they exist
+        # in file like "desk_CalibrationData", which is a pickle
+        try:
+            f = open(str(self.location)+"_CalibrationData", 'r')
+            self.calibrationValues = pickle.load(f)
+            f.close()
+        except IOError:
+            self.calibrationValues = []
         
         arduino.AnalogInput.__init__(self, ard, port)
 
@@ -39,12 +47,18 @@ class tempSensor(arduino.AnalogInput):
         point = (self.getValue(), temp)
         self.calibrationValues.append(point)
 
+        # save the updated calibration values
+        f = open(str(self.location)+"_CalibrationData", 'w')
+        pickle.dump(self.calibrationValues, f)
+        f.close()
+
     # getValue is inherited
 
 if __name__ == "__main__":
     import time
     ard = arduino.Arduino()
     t = tempSensor(ard, 0, "desk")
+    ard.run()
     time.sleep(1)
 
     
